@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Anna Rusnak, Lab 4, Zadanie_SVG</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #979797;
+        }
+
+        svg {
+            width: 800px;
+            height: 600px;
+            border: 1px solid black;
+            background: white;
+        }
+
+        h2 {
+            position: absolute;
+            top: 0%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Anna Rusnak, Lab 4, Zadanie_SVG</h2>
+    <svg id="svgRoot">
+    </svg>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.getElementById("svgRoot");
+
+            function createFulcrum(x, y, height, baseHalfWidth, color) {
+                const points = [
+                    x + "," + (y - height), // Top point of the triangle (fulcrum point)
+                    (x - baseHalfWidth) + "," + y, // Left base point of the triangle
+                    (x + baseHalfWidth) + "," + y  // Right base point of the triangle
+                ].join(" ");
+
+                const fulcrum = document.createElementNS(svgNS, "polygon");
+                fulcrum.setAttribute("points", points);
+                fulcrum.setAttribute("fill", color);
+                svg.appendChild(fulcrum);
+            }
+
+            function createOctagon(x, y, sideLength, group) {
+                const radius = sideLength / (2 * Math.sin(Math.PI / 8));
+                const points = [];
+                const octagonGroup = document.createElementNS(svgNS, "g");
+
+                for (let i = 0; i < 8; i++) {
+                    let angle_deg = i * 45;
+                    let angle_rad = angle_deg * Math.PI / 180;
+                    let pointX = x + radius * Math.cos(angle_rad);
+                    let pointY = y + radius * Math.sin(angle_rad);
+                    points.push(pointX + ',' + pointY);
+
+                    const spoke = document.createElementNS(svgNS, "line");
+                    spoke.setAttribute("x1", x);
+                    spoke.setAttribute("y1", y);
+                    spoke.setAttribute("x2", pointX);
+                    spoke.setAttribute("y2", pointY);
+                    spoke.setAttribute("stroke", "black");
+                    octagonGroup.appendChild(spoke);
+                }
+
+                const octagon = document.createElementNS(svgNS, "polygon");
+                octagon.setAttribute("points", points.join(' '));
+                octagon.setAttribute("fill", "transparent");
+                octagon.setAttribute("stroke", "black");
+                octagonGroup.appendChild(octagon);
+                group.appendChild(octagonGroup);
+
+                return octagonGroup;
+            }
+
+            function createBar(startX, startY, endX, endY, width, color, group) {
+                const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+                const angle = Math.atan2(endY - startY, endX - startX) * (180 / Math.PI);
+
+                const bar = document.createElementNS(svgNS, "rect");
+                bar.setAttribute("x", startX);
+                bar.setAttribute("y", startY - width / 2);
+                bar.setAttribute("width", length);
+                bar.setAttribute("height", width);
+                bar.setAttribute("fill", color);
+                bar.setAttribute("transform", `rotate(${angle}, ${startX}, ${startY})`);
+                group.appendChild(bar);
+            }
+
+
+            function createAssembly(x, y, scale, fulcrumColor) {
+                const rotatingGroup = document.createElementNS(svgNS, "g");
+                rotatingGroup.setAttribute("transform", `translate(${x}, ${y}) scale(${scale})`);
+
+                createFulcrum(x, y + 70 * scale, 70 * scale, 20 * scale, fulcrumColor);
+                svg.appendChild(rotatingGroup);
+
+                const leftOctagonGroup = createOctagon(-70, 0, 20, rotatingGroup);
+                const rightOctagonGroup = createOctagon(70, 0, 20, rotatingGroup);
+                createBar(-75, 0, 75, 0, 10, 'red', rotatingGroup);
+
+                animateAssembly(rotatingGroup, leftOctagonGroup, rightOctagonGroup); 
+            }
+
+            function animateAssembly(group, leftOctagonGroup, rightOctagonGroup) {
+                let angle = 0;
+                const octagonSpeedFactor = 2;
+
+                function animate() {
+                    angle = (angle + 1) % 360;
+                    const reverseAngle = 360 - (angle * octagonSpeedFactor) % 360;
+
+
+                    group.setAttribute('transform', group.getAttribute('transform').split(' rotate')[0] + ` rotate(${angle})`);
+
+
+                    leftOctagonGroup.setAttribute('transform', `rotate(${reverseAngle}, ${leftOctagonGroup.getBBox().x + leftOctagonGroup.getBBox().width / 2}, ${leftOctagonGroup.getBBox().y + leftOctagonGroup.getBBox().height / 2})`);
+                    rightOctagonGroup.setAttribute('transform', `rotate(${reverseAngle}, ${rightOctagonGroup.getBBox().x + rightOctagonGroup.getBBox().width / 2}, ${rightOctagonGroup.getBBox().y + rightOctagonGroup.getBBox().height / 2})`);
+
+                    requestAnimationFrame(animate);
+                }
+                animate();
+            }
+
+            createAssembly(200, 300, 1, 'purple');
+            createAssembly(450, 370, 1.5, 'blue');
+            createAssembly(700, 300, 0.5, 'green');
+        });
+    </script>
+</body>
+
+</html>
