@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Anna Rusnak, Lab 3, Zadanie_hierarchia</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #979797;
+        }
+
+        canvas {
+            border: 1px solid black;
+            background: white;
+        }
+
+        h2 {
+            position: absolute;
+            top: 0%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Anna Rusnak, Lab 3, Zadanie_hierarchia</h2>
+    <canvas id="canvas" width="800" height="600"></canvas>
+
+    <script>
+        // Functions related to drawing elements
+        function drawFulcrum(ctx, x, y, height, baseHalfWidth, color) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x, y - height);
+            ctx.lineTo(x - baseHalfWidth, y);
+            ctx.lineTo(x + baseHalfWidth, y);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawBar(ctx, x, y, length, width, angle) {
+            ctx.fillStyle = 'red';
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle * Math.PI / 180);
+            ctx.fillRect(-length / 2, -width / 2, length, width);
+            ctx.restore();
+        }
+
+        function drawWheel(ctx, x, y, sideLength, angle) {
+            let radius = sideLength / (2 * Math.sin(Math.PI / 8));
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle * Math.PI / 180);
+            ctx.beginPath();
+            for (let i = 0; i <= 8; i++) {
+                ctx.lineTo(
+                    radius * Math.cos(i * 2 * Math.PI / 8),
+                    radius * Math.sin(i * 2 * Math.PI / 8)
+                );
+            }
+            ctx.closePath();
+            ctx.stroke();
+            for (let i = 0; i < 8; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(
+                    radius * Math.cos(i * 2 * Math.PI / 8),
+                    radius * Math.sin(i * 2 * Math.PI / 8)
+                );
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        // Classes
+        class Fulcrum {
+            constructor(x, y, height, baseHalfWidth, color) {
+                this.x = x;
+                this.y = y;
+                this.height = height;
+                this.baseHalfWidth = baseHalfWidth;
+                this.color = color;
+            }
+
+            draw(ctx) {
+                drawFulcrum(ctx, this.x, this.y, this.height, this.baseHalfWidth, this.color);
+            }
+        }
+
+        class Bar {
+            constructor(length, width) {
+                this.length = length;
+                this.width = width;
+            }
+
+            draw(ctx, x, y, angle) {
+                drawBar(ctx, x, y, this.length, this.width, angle);
+            }
+        }
+
+        class Wheel {
+            constructor(x, y, sideLength, angle) {
+                this.x = x;
+                this.y = y;
+                this.sideLength = sideLength;
+                this.angle = angle;
+            }
+
+            draw(ctx) {
+                drawWheel(ctx, this.x, this.y, this.sideLength, this.angle);
+            }
+
+            updateAngle() {
+                this.angle = (this.angle - 2) % 360;
+            }
+        }
+
+        class Scene {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.width = this.canvas.width;
+                this.height = this.canvas.height;
+
+                this.fulcrums = [
+                    new Fulcrum(this.width * 0.3, this.height * 0.40, 80, 17, "purple"),
+                    new Fulcrum(this.width * 0.55, this.height * 0.70, 90, 20, "blue"),
+                    new Fulcrum(this.width * 0.7, this.height * 0.30, 70, 15, "green")
+                ];
+                this.bars = [
+                    new Bar(160, 9),
+                    new Bar(180, 10),
+                    new Bar(140, 8)
+                ];
+                this.wheels = [
+                    [
+                        new Wheel(-80, 0, 25, 0),
+                        new Wheel(80, 0, 25, 0)
+                    ],
+                    [
+                        new Wheel(-90, 0, 30, 0),
+                        new Wheel(90, 0, 30, 0)
+                    ],
+                    [
+                        new Wheel(-70, 0, 20, 0),
+                        new Wheel(70, 0, 20, 0)
+                    ]
+                ];
+                this.angles = [0, 0, 0];
+            }
+
+            clearCanvas() {
+                this.ctx.clearRect(0, 0, this.width, this.height);
+            }
+
+            draw() {
+                this.clearCanvas();
+                const ctx = this.ctx;
+                this.fulcrums.forEach((fulcrum, index) => {
+                    fulcrum.draw(ctx);
+                    this.bars[index].draw(ctx, fulcrum.x, fulcrum.y - fulcrum.height, this.angles[index]);
+                    ctx.save();
+                    ctx.translate(fulcrum.x, fulcrum.y - fulcrum.height);
+                    ctx.rotate(this.angles[index] * Math.PI / 180);
+                    this.wheels[index].forEach(wheel => wheel.draw(ctx));
+                    ctx.restore();
+                });
+            }
+
+            animate() {
+                this.draw();
+                this.wheels.flat().forEach(wheel => wheel.updateAngle());
+                this.angles = this.angles.map(angle => (angle + 1) % 360); 
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        const scene = new Scene('canvas');
+        scene.animate();
+    </script>
+</body>
+
+</html>
