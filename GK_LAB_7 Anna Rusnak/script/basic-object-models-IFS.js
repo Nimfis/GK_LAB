@@ -526,136 +526,44 @@ function uvCone(radius, height, slices, noBottom) {
        indices: indices
    };   
 }
-// function uvPyramid(radius, height, slices, noBottom) {
-//    radius = radius || 0.5;
-//     height = height || 2 * radius;
-//     slices = slices || 32;
-//     var vertexCount = slices * 2 + 1;
-//     if (!noBottom) vertexCount += slices + 2;
-//     var triangleCount = slices * 2;
-//     if (!noBottom) triangleCount += slices;
-//     var vertices = new Float32Array(vertexCount * 3);
-//     var normals = new Float32Array(vertexCount * 3);
-//     var texCoords = new Float32Array(vertexCount * 2);
-//     var indices = new Uint16Array(triangleCount * 3);
-//     var du = (2 * Math.PI) / slices;
-//     var kv = 0;
-//     var kt = 0;
-//     var k = 0;
-//     var i, j, u;
-//     for (i = 0; i < slices; i++) {
-//         u = i * du;
-//         var c = Math.cos(u);
-//         var s = Math.sin(u);
-//         vertices[kv] = c * radius;
-//         normals[kv++] = c; // Normalne są prostopadłe do płaszczyzny podstawy, więc są równoległe do osi X
-//         vertices[kv] = s * radius;
-//         normals[kv++] = s;
-//         vertices[kv] = -height / 2;
-//         normals[kv++] = 0; // Normalne do dna wskazują w dół (ujemna os Z)
-//         texCoords[kt++] = 0.5 + c * 0.5; // Proste mapowanie tekstury
-//         texCoords[kt++] = 0.5 + s * 0.5;
-//     }
-//     vertices[kv] = 0;
-//     normals[kv++] = 0;
-//     vertices[kv] = 0;
-//     normals[kv++] = 0;
-//     vertices[kv] = -height / 2;
-//     normals[kv++] = -1; // Normalne do dna wskazują w dół (ujemna os Z)
-//     texCoords[kt++] = 0.5;
-//     texCoords[kt++] = 0.5;
-//     for (i = 0; i < slices; i++) {
-//         indices[k++] = i;
-//         indices[k++] = (i + 1) % slices;
-//         indices[k++] = slices;
-//         indices[k++] = i;
-//         indices[k++] = slices;
-//         indices[k++] = slices + 1;
-//     }
-//     if (!noBottom) {
-//         var startIndex = kv / 3;
-//         vertices[kv] = 0;
-//         normals[kv++] = 0;
-//         vertices[kv] = 0;
-//         normals[kv++] = 0;
-//         vertices[kv] = -height / 2;
-//         normals[kv++] = -1;
-//         texCoords[kt++] = 0.5;
-//         texCoords[kt++] = 0.5;
-//         for (i = 0; i < slices; i++) {
-//             u = (i + 0.5) * du;
-//             var c = Math.cos(u);
-//             var s = Math.sin(u);
-//             vertices[kv] = c * radius;
-//             normals[kv++] = 0;
-//             vertices[kv] = s * radius;
-//             normals[kv++] = 0;
-//             vertices[kv] = -height / 2;
-//             normals[kv++] = -1;
-//             texCoords[kt++] = 0.5 + c * 0.5;
-//             texCoords[kt++] = 0.5 + s * 0.5;
-//         }
-//         for (i = 0; i < slices; i++) {
-//             indices[k++] = startIndex;
-//             indices[k++] = startIndex + i + 1;
-//             indices[k++] = startIndex + i + 2;
-//         }
-//     }
-//     return {
-//         vertexPositions: vertices,
-//         vertexNormals: normals,
-//         vertexTextureCoords: texCoords,
-//         indices: indices
-//     };
-// }
 
-function uvPyramid(baseWidth, height, slices, noBottom) {
-   baseWidth = baseWidth || 1;
-   height = height || 1;
-   slices = slices || 4; // zamiast slices używamy jako liczby boków piramidy
+function uvPyramid(radius, height, slices, noBottom) {
+   radius = radius || 1;
+   height = height || 2 * radius;
+   slices = slices || 8;
 
-   var vertexCount = (slices + 1) * 4;
-   if (!noBottom) vertexCount += slices + 2; // dodajemy dodatkowe wierzchołki dla dolnej podstawy
-   var triangleCount = slices * 2 + (slices - 2) * 2;
-   if (!noBottom) triangleCount += slices;
-
+   var vertexCount = (slices + 1) * 2 + (noBottom ? 0 : slices + 2);
+   var triangleCount = slices * 2 + (noBottom ? 0 : slices);
    var vertices = new Float32Array(vertexCount * 3);
    var normals = new Float32Array(vertexCount * 3);
    var texCoords = new Float32Array(vertexCount * 2);
    var indices = new Uint16Array(triangleCount * 3);
 
-   var halfWidth = baseWidth / 2;
-   var du = (2 * Math.PI) / slices;
+   var normallength = Math.sqrt(height * height + radius * radius);
+   var n1 = height / normallength;
+   var n2 = radius / normallength;
+   var du = 2 * Math.PI / slices;
    var kv = 0;
    var kt = 0;
    var k = 0;
-   var i, j, u;
+   var i, u;
 
-   // Wierzchołki boczne
-   for (i = 0; i < slices; i++) {
-      u = i * du;
-      var c = Math.cos(u);
-      var s = Math.sin(u);
-      // Wierzchołki podstawy
-      vertices[kv] = halfWidth * c;
-      normals[kv++] = 0;
-      vertices[kv] = halfWidth * s;
-      normals[kv++] = 0;
-      vertices[kv] = -height / 2;
-      normals[kv++] = -1;
-      texCoords[kt++] = 0.5 * (c + 1);
-      texCoords[kt++] = 0.5 * (s + 1);
-      // Wierzchołki górnej podstawy
-      vertices[kv] = 0;
-      normals[kv++] = 0;
-      vertices[kv] = 0;
-      normals[kv++] = 0;
-      vertices[kv] = height / 2;
-      normals[kv++] = 1;
-      texCoords[kt++] = 0.5;
-      texCoords[kt++] = 0.5;
+   // Bottom vertices, normals and texture coordinates
+   for (i = 0; i <= slices; i++) {
+       u = i * du;
+       var c = Math.cos(u);
+       var s = Math.sin(u);
+       vertices[kv] = c * radius;
+       normals[kv++] = 0;
+       vertices[kv] = s * radius;
+       normals[kv++] = 0;
+       vertices[kv] = -height / 2;
+       normals[kv++] = -1;
+       texCoords[kt++] = 0.5 - 0.5 * c;
+       texCoords[kt++] = 0.5 + 0.5 * s;
    }
-   // Dodatkowe wierzchołki na wierzchołku piramidy
+
+   // Top vertex
    vertices[kv] = 0;
    normals[kv++] = 0;
    vertices[kv] = 0;
@@ -665,52 +573,50 @@ function uvPyramid(baseWidth, height, slices, noBottom) {
    texCoords[kt++] = 0.5;
    texCoords[kt++] = 0.5;
 
-   // Indeksy dla boków
+   // Side vertices, normals and texture coordinates
+   var start = kv / 3 - slices - 1;
    for (i = 0; i < slices; i++) {
-      indices[k++] = i * 2;
-      indices[k++] = i * 2 + 1;
-      indices[k++] = (i * 2 + 2) % (slices * 2);
-      indices[k++] = i * 2 + 1;
-      indices[k++] = (i * 2 + 3) % (slices * 2);
-      indices[k++] = (i * 2 + 2) % (slices * 2);
+       u = i * du;
+       var c = Math.cos(u);
+       var s = Math.sin(u);
+       vertices[kv] = c * radius;
+       normals[kv++] = c * n1;
+       vertices[kv] = s * radius;
+       normals[kv++] = s * n1;
+       vertices[kv] = -height / 2;
+       normals[kv++] = n2;
+       texCoords[kt++] = i / slices;
+       texCoords[kt++] = 1;
    }
 
-   // Indeksy dla dolnej podstawy
+   // Indices for sides
+   for (i = 0; i < slices; i++) {
+       indices[k++] = i;
+       indices[k++] = slices;
+       indices[k++] = (i + 1) % slices;
+   }
+
+   // Indices for bottom
    if (!noBottom) {
-      var startIndex = kv / 3;
-      vertices[kv] = 0;
-      normals[kv++] = 0;
-      vertices[kv] = 0;
-      normals[kv++] = 0;
-      vertices[kv] = -height / 2;
-      normals[kv++] = -1;
-      texCoords[kt++] = 0.5;
-      texCoords[kt++] = 0.5;
-      for (i = 0; i <= slices; i++) {
-         u = 2 * Math.PI - i * du;
-         var c = Math.cos(u);
-         var s = Math.sin(u);
-         vertices[kv] = c * halfWidth;
-         normals[kv++] = 0;
-         vertices[kv] = s * halfWidth;
-         normals[kv++] = 0;
-         vertices[kv] = -height / 2;
-         normals[kv++] = -1;
-         texCoords[kt++] = 0.5 - 0.5 * c;
-         texCoords[kt++] = 0.5 + 0.5 * s;
-      }
-      for (i = 0; i < slices; i++) {
-         indices[k++] = startIndex;
-         indices[k++] = startIndex + i + 1;
-         indices[k++] = startIndex + i + 2;
-      }
+       var startIndex = kv / 3 - slices - 1;
+       for (i = 0; i < slices; i++) {
+           indices[k++] = slices + 1;
+           indices[k++] = i;
+           indices[k++] = (i + 1) % slices;
+       }
    }
 
    return {
-      vertexPositions: vertices,
-      vertexNormals: normals,
-      vertexTextureCoords: texCoords,
-      indices: indices
+       vertexPositions: vertices,
+       vertexNormals: normals,
+       vertexTextureCoords: texCoords,
+       indices: indices
    };
 }
+
+
+
+
+
+
 
