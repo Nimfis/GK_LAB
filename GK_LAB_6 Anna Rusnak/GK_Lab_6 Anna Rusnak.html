@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>LAB 6 Anna Rusnak</title>
+        <link rel="stylesheet" href="demo.css">
+        <script src="script/demo-core.js"></script>
+        <script src="script/glsim.js"></script>
+        <script src="script/teapot-model-IFS.js"></script>
+        <script src="script/basic-object-models-IFS.js"></script>
+        <script>
+            var camera;
+            
+            var drawBase; // checkbox for turning display of base on and off
+            var ambientLight; // checkbox for turning global ambient light on and off
+            var viewpointLight; // checkbox for turning viewpoint light on and off
+            
+            var animating = false; // tells whether the animation is running
+            var frameNumber = 0; // frame number for use in animation
+            
+            function lights() {
+            
+                glColor3d(0.7, 0.7, 0.7); // Change light color to a brighter gray
+                var zero = [0, 0, 0, 1];
+                glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, zero);
+            
+                if (viewpointLight.checked)
+                    glEnable(GL_LIGHT0);
+                else
+                    glDisable(GL_LIGHT0);
+            
+                // Fixed color for green light
+                var green = [0, 1, 0, 1]; // Brighter green
+                var greenAmbient = [0, 0.2, 0, 1]; // Slightly brighter ambient green
+                glLightfv(GL_LIGHT1, GL_AMBIENT, greenAmbient);
+                glLightfv(GL_LIGHT1, GL_DIFFUSE, green);
+                glLightfv(GL_LIGHT1, GL_SPECULAR, green);
+            
+                glEnable(GL_LIGHT1); // Always enable the green light
+            
+                glPushMatrix();
+                glRotated((frameNumber + 100) * 0.8743, 0, 1, 0);
+                glTranslated(9, 8, 0);
+                glLightfv(GL_LIGHT1, GL_POSITION, zero);
+                uvSphere(0.5, 16, 8);
+                glPopMatrix();
+            
+                glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, zero); // Turn off emission color!
+            } // end lights()
+            
+            /*  Fills the array with RGBA color components corresponding the given HSV color 
+             *  components, where h, s, and v are in the range 0.0 to 1.0.
+             */
+            function colorArrayForHue(h, s, v) {
+                var r, g, b;
+                var c, x;
+                h = h * 359;
+                c = v * s;
+                x = (h < 120) ? h / 60 : (h < 240) ? (h - 120) / 60 : (h - 240) / 60;
+                x = c * (1 - Math.abs(x - 1));
+                x += (v - c);
+                switch (Math.floor(h / 60)) {
+                    case 0:
+                        r = v;
+                        g = x;
+                        b = v - c;
+                        break;
+                    case 1:
+                        r = x;
+                        g = v;
+                        b = v - c;
+                        break;
+                    case 2:
+                        r = v - c;
+                        g = v;
+                        b = x;
+                        break;
+                    case 3:
+                        r = v - c;
+                        g = x;
+                        b = v;
+                        break;
+                    case 4:
+                        r = x;
+                        g = v - c;
+                        b = v;
+                        break;
+                    case 5:
+                        r = v;
+                        g = v - c;
+                        b = x;
+                        break;
+                }
+                var array = new Array(4);
+                array[0] = r;
+                array[1] = g;
+                array[2] = b;
+                array[3] = 1;
+                return array;
+            }
+            
+            function drawBASER() {
+                var thickness = 2.5;
+                glBegin(GL_QUADS);
+            
+                // Bottom face
+                glColor3d(0.5, 0, 0); // Dark Red
+                glVertex3d(-1, -1, -thickness);
+                glVertex3d(1, -1, -thickness);
+                glVertex3d(1, -1, 0);
+                glVertex3d(-1, -1, 0);
+            
+                // Front face
+                glColor3d(0, 0.5, 0); // Dark Green
+                glVertex3d(-1, -1, 0);
+                glVertex3d(1, -1, 0);
+                glVertex3d(1, 1, 0);
+                glVertex3d(-1, 1, 0);
+            
+                // Top face
+                glColor3d(0, 0, 0.5); // Dark Blue
+                glVertex3d(-1, 1, 0);
+                glVertex3d(1, 1, 0);
+                glVertex3d(1, 1, -thickness);
+                glVertex3d(-1, 1, -thickness);
+            
+                // Back face
+                glColor3d(0.5, 0.5, 0); // Olive
+                glVertex3d(-1, 1, -thickness);
+                glVertex3d(1, 1, -thickness);
+                glVertex3d(1, -1, -thickness);
+                glVertex3d(-1, -1, -thickness);
+            
+                // Right face
+                glColor3d(0.5, 0, 0.5); // Purple
+                glVertex3d(1, -1, -thickness);
+                glVertex3d(1, -1, 0);
+                glVertex3d(1, 1, 0);
+                glVertex3d(1, 1, -thickness);
+            
+                // Left face
+                glColor3d(0, 0.5, 0.5); // Teal
+                glVertex3d(-1, -1, -thickness);
+                glVertex3d(-1, -1, 0);
+                glVertex3d(-1, 1, 0);
+                glVertex3d(-1, 1, -thickness);
+            
+                glEnd();
+            } // Global variable to store rotation angle of the pyramid
+            let pyramidRotationAngles = {
+                x: -90,
+                y: 0,
+                z: 0
+            };
+            
+            function display() {
+                glClearColor(0, 0, 0, 1);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            
+                camera.apply();
+                lights();
+            
+                if (ambientLight.checked) {
+                    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.15, 0.15, 0.15, 1]);
+                } else {
+                    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0, 0, 0, 1]);
+                }
+            
+                if (drawBase.checked) {
+                    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, [0, 0, 0, 1]);
+            
+                    glPushMatrix();
+                    glTranslated(0, -5, 0);
+                    glRotated(-90, 1, 0, 0);
+                    glScaled(10, 10, 0.5);
+            
+                    // Different colors for each face of the base
+                    glBegin(GL_QUADS);
+                    glColor3d(0.8, 0, 0); // Bright Red
+                    glVertex3d(-1, -1, -1);
+                    glVertex3d(1, -1, -1);
+                    glVertex3d(1, -1, 1);
+                    glVertex3d(-1, -1, 1); 
+                    glColor3d(0, 0.8, 0); // Bright Green
+                    glVertex3d(-1, -1, 1);
+                    glVertex3d(1, -1, 1);
+                    glVertex3d(1, 1, 1);
+                    glVertex3d(-1, 1, 1); 
+                    glColor3d(0, 0, 0.8); // Bright Blue
+                    glVertex3d(-1, 1, 1);
+                    glVertex3d(1, 1, 1);
+                    glVertex3d(1, 1, -1);
+                    glVertex3d(-1, 1, -1); 
+                    glColor3d(0.8, 0.8, 0); // Bright Yellow
+                    glVertex3d(-1, 1, -1);
+                    glVertex3d(1, 1, -1);
+                    glVertex3d(1, -1, -1);
+                    glVertex3d(-1, -1, -1); 
+                    glColor3d(0.8, 0, 0.8); // Bright Magenta
+                    glVertex3d(1, -1, -1);
+                    glVertex3d(1, -1, 1);
+                    glVertex3d(1, 1, 1);
+                    glVertex3d(1, 1, -1); 
+                    glColor3d(0, 0.8, 0.8); // Bright Cyan
+                    glVertex3d(-1, -1, -1);
+                    glVertex3d(-1, -1, 1);
+                    glVertex3d(-1, 1, 1);
+                    glVertex3d(-1, 1, -1); 
+                    glEnd();
+            
+                    glPopMatrix();
+                }
+            
+                glColor3d(1, 0, 0);
+            
+                glPushMatrix();
+                glTranslatef(0, 2, 0);
+                glRotatef(pyramidRotationAngles.x, 1, 0, 0); // Obrót wokół osi x
+                glRotatef(pyramidRotationAngles.y, 0, 1, 0); // Obrót wokół osi y
+                glRotatef(pyramidRotationAngles.z, 0, 0, 1); // Obrót wokół osi z
+                glScalef(0.65, 0.65, 0.65);
+                glsimDrawModel(uvPyramid(25, 20, 8)); // Change from 6 to 8 sides for the pyramid base
+                glPopMatrix();
+            }
+            
+            // Function to update pyramid rotation angle
+            function updatePyramidRotation(xAngle, yAngle, zAngle) {
+                pyramidRotationAngles.x += xAngle;
+                pyramidRotationAngles.y += yAngle;
+                pyramidRotationAngles.z += zAngle;
+            }
+            
+            /* Initialization, including setting up a camera and configuring the four lights.
+             */
+            function initGL() {
+                glClearColor(0, 0, 0, 1);
+                glEnable(GL_DEPTH_TEST);
+                glEnable(GL_LIGHTING);
+                glEnable(GL_LIGHT0);
+                glEnable(GL_NORMALIZE);
+                glEnable(GL_COLOR_MATERIAL);
+                glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
+                glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 32);
+            
+                var dim = [0.5, 0.5, 0.5, 1];
+                glLightfv(GL_LIGHT0, GL_DIFFUSE, dim);
+                glLightfv(GL_LIGHT0, GL_SPECULAR, dim);
+            }
+            
+            function init() {
+                try {
+                    glsimUse("maincanvas");
+                } catch (e) {
+                    document.getElementById("canvas-holder").innerHTML = "<p><b>Sorry, an error occurred:<br>" +
+                        e + "</b></p>";
+                    return;
+                }
+            
+                drawBase = document.getElementById("drawBase");
+                ambientLight = document.getElementById("ambientLight");
+                viewpointLight = document.getElementById("viewpointLight");
+            
+                drawBase.checked = true;
+                ambientLight.checked = true;
+                viewpointLight.checked = true;
+                drawBase.onchange = display;
+                ambientLight.onchange = display;
+                viewpointLight.onchange = display;
+                initGL();
+                camera = new Camera();
+                camera.lookAt(5, 10, 30, 0, 0, 0, 0, 1, 0);
+                camera.setScale(15);
+                camera.installTrackball(display);
+                display();
+            }
+        </script>
+    </head>
+    <body onload="init()">
+        <div id="content">
+            <h3 id="headline">LAB 6 Światło - Anna Rusnak</h3>
+            <div id="canvas-holder">
+                <canvas id="maincanvas" width="500" height="500"></canvas>
+            </div>
+            <div id="tools">
+                <p>
+                    <label><input type="checkbox" id="drawBase">Draw Base</label><br><br>
+                    <label><input type="checkbox" id="ambientLight">Global Ambient</label><br><br>
+                    <label><input type="checkbox" id="viewpointLight">Viewpoint Light</label><br>
+                </p>
+            </div>
+        </div>
+    </body>
+</html>
