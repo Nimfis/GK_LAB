@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LAB_9 Three.js - Kontury </title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0xffffff); // Set background to white
+        document.body.appendChild(renderer.domElement);
+
+        // Add lighting
+        const light1 = new THREE.DirectionalLight(0xffffff, 1.5);
+        light1.position.set(5, 10, 7.5);
+        scene.add(light1);
+
+        const light2 = new THREE.DirectionalLight(0xffffff, 0.8);
+        light2.position.set(-5, 10, -7.5);
+        scene.add(light2);
+
+        const ambientLight = new THREE.AmbientLight(0x606060);
+        scene.add(ambientLight);
+
+        // Create very dark gray material for bishop
+        const veryDarkGrayMaterial = new THREE.MeshPhongMaterial({ color: 0x1A1A1A });
+
+        // Create base of the bishop
+        const base1 = new THREE.Mesh(
+            new THREE.CylinderGeometry(1, 0.7, 0.10, 90),
+            veryDarkGrayMaterial
+        );
+        const base2 = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.9, 0.9, 0.20, 90),
+            veryDarkGrayMaterial
+        );
+        base2.position.y = 0.2;
+
+        let allBase = new THREE.Group();
+        allBase.add(base1);
+        allBase.add(base2);
+
+        // Create body parts of the bishop
+        const part1 = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.4, 0.7, 3, 10), // Increased height
+            veryDarkGrayMaterial
+        );
+        part1.position.set(0, 1.5, 0); // Adjusted position for increased height
+        allBase.add(part1);
+
+        const part2 = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.65, 0.7, 0.25, 80),
+            veryDarkGrayMaterial
+        );
+        part2.position.y = 3; // Adjusted position for increased height
+
+        const part3 = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.3, 0.4, 0.9, 32),
+            veryDarkGrayMaterial
+        );
+        part3.position.set(0, 3.25, 0); // Adjusted position for increased height
+
+        // Define the points for the inverted dome
+        const points = [];
+        points.push(new THREE.Vector2(0.3, 0)); // top
+        points.push(new THREE.Vector2(0.4, 0)); 
+        points.push(new THREE.Vector2(0.6, 0.5)); 
+        points.push(new THREE.Vector2(0.75, 1));
+        points.push(new THREE.Vector2(0.6, 1.2));
+        points.push(new THREE.Vector2(0.3, 1.4));
+        points.push(new THREE.Vector2(0.2, 1.5));
+        points.push(new THREE.Vector2(0, 1.5)); // bottom
+
+        const bishopHeadGeometry = new THREE.LatheGeometry(points, 40);
+        const bishopHead = new THREE.Mesh(bishopHeadGeometry, veryDarkGrayMaterial);
+        bishopHead.position.set(0, 3, 0);
+
+        allBase.add(part3);
+        allBase.add(part2);
+        allBase.add(bishopHead);
+        allBase.position.set(0, -2, 0);
+        scene.add(allBase);
+
+        // Create the slightly flattened sphere on top of the dome
+        const sphereGeometry = new THREE.SphereGeometry(0.25, 32, 32);
+        const sphere = new THREE.Mesh(sphereGeometry, veryDarkGrayMaterial);
+        sphere.position.set(0, 4.7, 0); // Adjusted position for increased height
+        sphere.scale.set(1, 0.8, 1); // Slightly flatten the sphere along the Y axis
+        allBase.add(sphere);
+
+        // Set camera position and zoom to make the bishop occupy the whole screen
+        camera.position.set(0, 1, 5);
+        camera.lookAt(new THREE.Vector3(0, 1, 0));
+
+        // Render loop
+        function render() {
+            renderer.render(scene, camera);
+        }
+
+        render();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
