@@ -106,7 +106,7 @@ var a_color_buffer;
 var u_type_loc;
 
 var POINT_COUNT = 30;   // How many points to draw.
-var POINT_SIZE = 64;    // Size in pixel of the square drawn for each point.
+var POINT_SIZE = 70;    // Size in pixel of the square drawn for each point.
  
 var positions = new Float32Array( 2*POINT_COUNT );  // Position data for points.
 var velocities = new Float32Array( 2*POINT_COUNT ); // Velocity data for points.
@@ -116,7 +116,7 @@ var velocities = new Float32Array( 2*POINT_COUNT ); // Velocity data for points.
 
 var COLOR = new Float32Array(3*POINT_COUNT);
 //insert
-var vertices = 6;
+var vertices = 8;
 var figura = 0;
 var color_ISRANDOM = false;
 var shape_ISSQUARE = false;
@@ -131,7 +131,7 @@ function RANDOMIZECOLOR(){
 }
 
 function MODIFYSHAPE(v3rtex){
-    vertices = v3rtex;
+    vertices = 8;
     
     if(shape_ISSQUARE == true){
         shape_ISSQUARE = false;

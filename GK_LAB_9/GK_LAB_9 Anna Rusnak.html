@@ -11,6 +11,7 @@
 </head>
 <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <p style="text-align: center;" >Wariant 4 </p>
     <script>
         // Scene setup
         const scene = new THREE.Scene();
@@ -59,10 +60,10 @@
         allBase.add(part1);
 
         const part2 = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.65, 0.7, 0.25, 80),
+            new THREE.CylinderGeometry(0.55, 0.6, 0.20, 80),
             veryDarkGrayMaterial
         );
-        part2.position.y = 3; // Adjusted position for increased height
+        part2.position.y = 3.01; // Adjusted position for increased height
 
         const part3 = new THREE.Mesh(
             new THREE.CylinderGeometry(0.3, 0.4, 0.9, 32),
@@ -70,12 +71,18 @@
         );
         part3.position.set(0, 3.25, 0); // Adjusted position for increased height
 
+        const part4 = new THREE.Mesh(
+     new THREE.CylinderGeometry(0.65, 0.7, 0.20, 100),
+     veryDarkGrayMaterial
+ );
+ part4.position.y = 2.8; // Adjusted position for increased height
+
         // Define the points for the inverted dome
         const points = [];
         points.push(new THREE.Vector2(0.3, 0)); // top
         points.push(new THREE.Vector2(0.4, 0)); 
         points.push(new THREE.Vector2(0.6, 0.5)); 
-        points.push(new THREE.Vector2(0.75, 1));
+        points.push(new THREE.Vector2(0.7, 1));
         points.push(new THREE.Vector2(0.6, 1.2));
         points.push(new THREE.Vector2(0.3, 1.4));
         points.push(new THREE.Vector2(0.2, 1.5));
@@ -85,10 +92,11 @@
         const bishopHead = new THREE.Mesh(bishopHeadGeometry, veryDarkGrayMaterial);
         bishopHead.position.set(0, 3, 0);
 
+        allBase.add(part4);
         allBase.add(part3);
         allBase.add(part2);
         allBase.add(bishopHead);
-        allBase.position.set(0, -2, 0);
+        allBase.position.set(0, -1.5, 0);
         scene.add(allBase);
 
         // Create the slightly flattened sphere on top of the dome
