@@ -272,7 +272,7 @@ function doKey(evt) {
 } // end doKey();
  
  
-/* Initialize the WebGL context.  Called from init() */
+
 function initGL() {
  
     var prog = createProgram(gl,"vshader-source", "fshader-source", "a_coords");
@@ -313,7 +313,7 @@ function initGL() {
     if (gl.getError() != gl.NO_ERROR) {
         console.log("During initialization, a GL error has been detected.");
     }
-} // end initGL()
+}
  
  
 /**
@@ -493,6 +493,6 @@ function init() {
 </script>
 </head>
 <body onload="init()">
-    <p style="text-align: center;" >Lab 10, Podstawy WebGL - Anna Rusnak</p2>
+    <p style="text-align: center;" >Lab 10, Zadanie WebGL - Anna Rusnak</p2>
 </body>
 </html>
