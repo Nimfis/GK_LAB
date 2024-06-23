@@ -15,14 +15,19 @@
         return Math.random();
     }
 
-    function spirale(n){
-        glColor3f(0, 1, 0);
+    function helix(n) {
+        glColor3f(0, 1, 0); // Setting the color to green
         glBegin(GL_LINE_STRIP);
-        const angle = Math.PI / (n * 0.5);
-        for (let i = 0; i < n * n; i++) {
-            const x = Math.cos(angle * i) * (0.03 * i);
-            const y = i / (2 * n);
-            const z = Math.sin(angle * i) * (0.03 * i);
+        const turns = 5; // Number of turns in the helix
+        const height = 1; // Total height of the helix
+        const stepHeight = height / (n * turns); // Height increment per step
+        const radius = 0.2; // Radius of the helix
+
+        for (let i = 0; i < n * turns; i++) {
+            const angle = 2 * Math.PI * i / n;
+            const x = Math.cos(angle) * radius;
+            const y = Math.sin(angle) * radius;
+            const z = i * stepHeight; // Move up along z-axis
 
             glVertex3d(x, y, z);
         }
@@ -36,15 +41,14 @@
             const angle1 = (i * 2 * Math.PI) / N;
             const angle2 = ((i + 1) * 2 * Math.PI) / N;
 
-            glColor3f(getColor(),getColor(),getColor());
+            glColor3f(getColor(), getColor(), getColor());
             
             glVertex3f(0, 0, 1);
-
             glVertex3f(Math.cos(angle1), Math.sin(angle1), 0);
             glVertex3f(Math.cos(angle2), Math.sin(angle2), 0);
         }
 
-        glColor3f(1,0,0);
+        glColor3f(1, 0, 0);
         for (let i = 0; i <= N - 1; ++i) {
             glVertex3f(0, 0, 0);
             glVertex3f(Math.cos(i * 2 * Math.PI / N), Math.sin(i * 2 * Math.PI / N), 0);
@@ -55,16 +59,16 @@
 
     function display() {
 
-        glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 
         glLoadIdentity(); 
-        glRotatef(rotateZ,0,0,1);
-        glRotatef(rotateY,0,1,0);
-        glRotatef(rotateX,1,0,0);
+        glRotatef(rotateZ, 0, 0, 1);
+        glRotatef(rotateY, 0, 1, 0);
+        glRotatef(rotateX, 1, 0, 0);
         
         if (object === 1) {
-            spirale(20);
-        }else{
+            helix(20);
+        } else {
             pyramid(8);
         }
         
@@ -80,25 +84,25 @@
     
     function doKeyDown(evt) {
         let key = evt.keyCode;
-        if ( key == 37 ) //left
+        if (key == 37) //left
            rotateY -= 15;
-        else if ( key == 39 )//right
+        else if (key == 39) //right
            rotateY += 15;
-        else if ( key == 40)//down
+        else if (key == 40) //down
            rotateX += 15;
-        else if ( key == 38 )//up
+        else if (key == 38) //up
            rotateX -= 15;
-        else if ( key == 33 )//page up
+        else if (key == 33) //page up
            rotateZ += 15;
-        else if ( key == 34 )//page down
+        else if (key == 34) //page down
            rotateZ -= 15;
-        else if ( key == 36 )//home
+        else if (key == 36) //home
            rotateX = rotateY = rotateZ = 0;
-        else if ( key == 49 )//Object 1
+        else if (key == 49) //Object 1
            object = 1;
-        else if ( key == 50 )//Object 2
+        else if (key == 50) //Object 2
            object = 2;
-        if (key >=34 && key <= 40) {
+        if (key >= 34 && key <= 40) {
             evt.preventDefault();
         }
         display();
@@ -125,8 +129,8 @@
 <body onload="init()">
 
 <h3>Anna Rusnak, Lab 5 - OpenGL 1.1</h3>
-<p>1 - spirale, 2 - Pyramide</p>
-<p>(Użyj klawiszy strzałek do obracania obiektów.)</p>
+<p>1 - Helix, 2 - Pyramid</p>
+<p>(Use arrow keys to rotate objects.)</p>
 
 <noscript>
 <p><b>Sorry, this page requires JavaScript!</b></p>
@@ -138,3 +142,127 @@
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
