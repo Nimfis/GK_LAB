@@ -10,14 +10,12 @@
 
 "use strict";
 
-var canvas, renderer, scene, camera; // Standard three.js requirements.
+var canvas, renderer, scene, camera;
 
-var controls;  // An OrbitControls object that is used to implement
-               // rotation of the scene using the mouse.  (It actually rotates
-               // the camera around the scene.)
+var controls;
 
-var animating = false;  // Set to true when an animation is in progress.
-var frameNumber = 0;  // Frame number is advanced by 1 for each frame while animating.
+var animating = false;
+var frameNumber = 0;
 
 var floor; 
 var pole1, pole2, pole3, pole4, pole5;
@@ -25,26 +23,19 @@ var pivot1, pivot2, pivot3, pivot4, pivot5;
 var roof, roof2;
 var horse1, horse2, horse3, horse4, horse5;
 
-/**
- *  The render function draws the scene.
- */
 function render() {
     renderer.render(scene, camera);
 }
 
-
-/**
- * This function is called by the init() method to create the world. 
- */
 function createWorld() {
     
-    renderer.setClearColor("white"); // Background color for scene.
+    renderer.setClearColor("white");
     scene = new THREE.Scene();
     
     camera = new THREE.PerspectiveCamera(30, canvas.width/canvas.height, 0.1, 100);
     camera.position.z = 40;
     camera.position.y = 20;
-    var light;  // A light shining from the direction of the camera; moves with the camera.
+    var light;
     light = new THREE.DirectionalLight();
     light.position.set(0,0,1);
     camera.add(light);
@@ -57,20 +48,20 @@ function createWorld() {
                color: 0xFFC0CB,
                specular: 0x222222,
                shininess: 16,
-               flatShading: true  // Use flatShading instead of shading
+               flatShading: true
             })
     );
     floor.rotation.y = Math.PI/12;
     scene.add(floor);
     
     var geometry = new THREE.SphereGeometry( 3.7, 32, 32 );
-    var material = new THREE.MeshBasicMaterial( { map: new THREE.TextureLoader().load('resources/earth.jpg') });
+    var material = new THREE.MeshBasicMaterial( { map: new THREE.TextureLoader().load('https://picsum.photos/512/512') });
     var sphere = new THREE.Mesh(geometry, material);
     sphere.position.y=3.8;
     scene.add(sphere);
 
     var radius = 11;
-    var angleOffset = Math.PI / 12; // To match the floor rotation angle
+    var angleOffset = Math.PI / 12;
     var positions = [
         { x: radius * Math.cos(angleOffset), z: radius * Math.sin(angleOffset) },
         { x: radius * Math.cos(2 * Math.PI / 5 + angleOffset), z: radius * Math.sin(2 * Math.PI / 5 + angleOffset) },
@@ -91,7 +82,7 @@ function createWorld() {
                color: 0x00FFFF,
                specular: 0x222222,
                shininess: 8,
-               flatShading: true  // Use flatShading instead of shading
+               flatShading: true
             })
     );
     roof.position.y = 9.1;
@@ -103,40 +94,46 @@ function createWorld() {
                 color: 0xFFC0CB,
                 specular: 0x222222,
                 shininess: 8,
-                flatShading: true  // Use flatShading instead of shading
+                flatShading: true
              })
     );
     roof2.position.y = 7.5;
     scene.add(roof2);
     
     var loader = new THREE.GLTFLoader();
- 
+
     loader.load('https://threejs.org/examples/models/gltf/Horse.glb', function (gltf) {
+        gltf.scene.traverse(function (node) {
+            if (node.isMesh) {
+                node.material.map = new THREE.TextureLoader().load('https://picsum.photos/256/256');
+                node.material.needsUpdate = true;
+            }
+        });
         gltf.scene.scale.multiplyScalar(0.03);
 
         horse1 = gltf.scene.clone();
         horse1.position.set(0, -3.7, 0);
-        horse1.rotation.y = -0.5 * Math.PI / 5; // Adjusted rotation for horse1
+        horse1.rotation.y = -0.5 * Math.PI / 5;
         pole1.add(horse1);
 
         horse2 = gltf.scene.clone();
         horse2.position.set(0, -3.7, 0);
-        horse2.rotation.y = -2.5 * Math.PI / 5; // Adjusted rotation for horse2
+        horse2.rotation.y = -2.5 * Math.PI / 5;
         pole2.add(horse2);
 
         horse3 = gltf.scene.clone();
         horse3.position.set(0, -3.7, 0);
-        horse3.rotation.y = -4.5 * Math.PI / 5; // Adjusted rotation for horse3
+        horse3.rotation.y = -4.5 * Math.PI / 5;
         pole3.add(horse3);
 
         horse4 = gltf.scene.clone();
         horse4.position.set(0, -3.7, 0);
-        horse4.rotation.y = -6.5 * Math.PI / 5; // Adjusted rotation for horse4
+        horse4.rotation.y = -6.5 * Math.PI / 5;
         pole4.add(horse4);
 
         horse5 = gltf.scene.clone();
         horse5.position.set(0, -3.7, 0);
-        horse5.rotation.y = -8.5 * Math.PI / 5; // Adjusted rotation for horse5
+        horse5.rotation.y = -8.5 * Math.PI / 5;
         pole5.add(horse5);
     });
     
@@ -166,7 +163,7 @@ function createPole(x, y, z) {
             color: 0x00FFFF,
             specular: 0x222222,
             shininess: 8,
-            flatShading: true  // Use flatShading instead of shading
+            flatShading: true
         })
     );
     pole.position.set(x, y, z);
@@ -174,12 +171,6 @@ function createPole(x, y, z) {
     return pole;
 }
 
-/**
- *  This function is called once for each frame of the animation, before
- *  the render() function is called for that frame.  It updates any
- *  animated properties.  The value of the global variable frameNumber
- *  is incrementd 1 before this function is called.
- */
 function updateForFrame() {
     
     floor.rotation.y -= 0.01;
@@ -193,19 +184,6 @@ function updateForFrame() {
     pivot5.rotation.y -= 0.01;
 }
 
-
-/* ---------------------------- MOUSE AND ANIMATION SUPPORT ------------------
-
-/**
- *  This page uses THREE.OrbitControls to let the user use the mouse to rotate
- *  the view.  OrbitControls are designed to be used during an animation, where
- *  the rotation is updated as part of preparing for the next frame.  The scene
- *  is not automatically updated just because the user drags the mouse.  To get
- *  the rotation to work without animation, I add another mouse listener to the
- *  canvas, just to call the render() function when the user drags the mouse.
- *  The same thing holds for touch events -- I call render for any mouse move
- *  event with one touch.
- */
 function installOrbitControls() {
     controls = new THREE.OrbitControls(camera,canvas);
     controls.noPan = true; 
@@ -232,7 +210,6 @@ function installOrbitControls() {
     canvas.addEventListener("touchmove", touch, false);
 }
 
-/*  Called when user changes setting of the Animate checkbox. */
 function doAnimateCheckbox() {
    var run = document.getElementById("animateCheckbox").checked;
    if (run != animating) {
@@ -243,7 +220,6 @@ function doAnimateCheckbox() {
    }
 }
 
-/*  Drives the animation, called by system through requestAnimationFrame() */
 function doFrame() {
     if (animating) {
         frameNumber++;
@@ -253,14 +229,6 @@ function doFrame() {
     }
 }
 
-/*----------------------------- INITIALIZATION ----------------------------------------
-
-/**
- *  This function is called by the onload event so it will run after the
- *  page has loaded.  It creates the renderer, canvas, and scene objects,
- *  calls createWorld() to add objects to the scene, and renders the
- *  initial view of the scene.  If an error occurs, it is reported.
- */
 function init() {
     try {
         canvas = document.getElementById("glcanvas");
